@@ -76,12 +76,14 @@
             line-height: var(--line-height-base);
             font-size: var(--font-size-base);
             min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .container {
             max-width: 700px;
             margin: 0 auto;
             padding: var(--spacing-lg);
+            box-sizing: border-box;
         }
 
         h1 {
@@ -101,8 +103,10 @@
         .card-glow-wrapper {
             position: relative;
             width: 100%;
+            max-width: 100%;
             border-radius: var(--border-radius-card);
             margin-bottom: var(--spacing-lg);
+            box-sizing: border-box;
         }
 
         .card-glow-wrapper::before,
@@ -153,6 +157,7 @@
             z-index: 2;
             border: 1px solid var(--border-color);
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .question {
@@ -165,6 +170,7 @@
             display: flex;
             flex-direction: column;
             gap: var(--spacing-md);
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -177,6 +183,7 @@
             border: none;
             width: 100%;
             text-align: center;
+            box-sizing: border-box;
         }
 
         .btn-yes {
@@ -207,10 +214,67 @@
             padding: var(--spacing-lg);
             border: 1px solid var(--border-color);
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            box-sizing: border-box;
         }
 
         .diagnosis strong {
             color: var(--accent-color);
+        }
+
+        .medical-term {
+            color: var(--accent-color);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            width: 80%;
+            max-width: 500px;
+            border-radius: var(--border-radius-card);
+            box-sizing: border-box;
+        }
+
+        .close {
+            color: var(--primary-text);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: var(--spacing-md);
+            }
+            .card-glow {
+                padding: var(--spacing-md);
+            }
+            .btn {
+                padding: 12px 16px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -266,13 +330,12 @@
         </div></div>
 
         <div id="smoking" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Smoking-related, such as chronic bronchitis or COPD. Quit smoking and see a doctor for evaluation (e.g., spirometry).</p>
+            <p><strong>Likely cause:</strong> Smoking-related, such as <span class="medical-term" data-explanation="Chronic bronchitis is a long-term inflammation of the bronchi, the airways in the lungs, often caused by smoking, leading to persistent cough and mucus production.">chronic bronchitis</span> or <span class="medical-term" data-explanation="COPD (Chronic Obstructive Pulmonary Disease) is a progressive lung disease that includes chronic bronchitis and emphysema, making it hard to breathe, primarily caused by smoking.">COPD</span>. Quit smoking and see a doctor for evaluation (e.g., <span class="medical-term" data-explanation="Spirometry is a common lung function test that measures how much air you can inhale and exhale, and how quickly you can exhale, to assess lung health.">spirometry</span>).</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
 
-        <!-- Remaining questions and diagnoses follow the same pattern -->
         <div id="q3" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p class="question">Question 3: Are you taking ACE inhibitor medications? (e.g., lisinopril, enalapril for blood pressure)</p>
+            <p class="question">Question 3: Are you taking <span class="medical-term" data-explanation="ACE inhibitors are a class of medications used to treat high blood pressure and heart failure by relaxing blood vessels.">ACE inhibitor</span> medications? (e.g., lisinopril, enalapril for blood pressure)</p>
             <div class="button-group">
                 <button class="btn btn-yes" onclick="answer('q3', 'yes')">Yes</button>
                 <button class="btn btn-no" onclick="answer('q3', 'no')">No</button>
@@ -285,7 +348,7 @@
         </div></div>
 
         <div id="q4" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p class="question">Question 4: Do you have symptoms of allergies or postnasal drip? (e.g., runny nose, sneezing, frequent throat clearing)</p>
+            <p class="question">Question 4: Do you have symptoms of allergies or <span class="medical-term" data-explanation="Postnasal drip is the excess mucus that drips down the back of the throat from the nose and sinuses, often causing cough or throat irritation.">postnasal drip</span>? (e.g., runny nose, sneezing, frequent throat clearing)</p>
             <div class="button-group">
                 <button class="btn btn-yes" onclick="answer('q4', 'yes')">Yes</button>
                 <button class="btn btn-no" onclick="answer('q4', 'no')">No</button>
@@ -293,7 +356,7 @@
         </div></div>
 
         <div id="uacs" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Upper airway cough syndrome (postnasal drip). Try antihistamines/decongestants and see a doctor if no improvement.</p>
+            <p><strong>Likely cause:</strong> <span class="medical-term" data-explanation="Upper airway cough syndrome (UACS) is a condition where irritation in the upper airways, often from postnasal drip due to allergies or sinus issues, leads to chronic cough.">Upper airway cough syndrome</span> (<span class="medical-term" data-explanation="Postnasal drip is the excess mucus that drips down the back of the throat from the nose and sinuses, often causing cough or throat irritation.">postnasal drip</span>). Try <span class="medical-term" data-explanation="Antihistamines are medications that block histamine to reduce allergy symptoms like sneezing and runny nose; decongestants reduce swelling in nasal passages to relieve congestion.">antihistamines/decongestants</span> and see a doctor if no improvement.</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
 
@@ -306,7 +369,7 @@
         </div></div>
 
         <div id="asthma" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Asthma. See a doctor for lung function tests and possible inhalers.</p>
+            <p><strong>Likely cause:</strong> <span class="medical-term" data-explanation="Asthma is a chronic condition where the airways narrow and swell, producing extra mucus, leading to difficulty breathing, coughing, and wheezing.">Asthma</span>. See a doctor for lung function tests and possible inhalers.</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
 
@@ -319,7 +382,7 @@
         </div></div>
 
         <div id="gerd" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Gastroesophageal reflux disease (GERD). Try antacids or PPIs and consult a doctor.</p>
+            <p><strong>Likely cause:</strong> <span class="medical-term" data-explanation="Gastroesophageal reflux disease (GERD) is a chronic condition where stomach acid flows back into the esophagus, causing heartburn and potentially cough.">Gastroesophageal reflux disease (GERD)</span>. Try <span class="medical-term" data-explanation="Antacids neutralize stomach acid to relieve heartburn; PPIs (proton pump inhibitors) reduce acid production in the stomach for longer-term relief.">antacids or PPIs</span> and consult a doctor.</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
 
@@ -332,14 +395,22 @@
         </div></div>
 
         <div id="postviral" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Post-viral cough. It may resolve on its own, but see a doctor if it persists beyond 8 weeks.</p>
+            <p><strong>Likely cause:</strong> <span class="medical-term" data-explanation="Post-viral cough is a lingering cough that persists after a viral respiratory infection, like a cold or flu, due to airway inflammation.">Post-viral cough</span>. It may resolve on its own, but see a doctor if it persists beyond 8 weeks.</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
 
         <div id="other" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
-            <p><strong>Likely cause:</strong> Less common issues (e.g., infections, environmental irritants, or other lung/heart conditions). See a specialist for further tests like CT scan or bronchoscopy.</p>
+            <p><strong>Likely cause:</strong> Less common issues (e.g., infections, environmental irritants, or other lung/heart conditions). See a specialist for further tests like <span class="medical-term" data-explanation="A CT scan (computed tomography) is an imaging test that uses X-rays to create detailed cross-sectional images of the body.">CT scan</span> or <span class="medical-term" data-explanation="Bronchoscopy is a procedure where a thin tube with a camera is inserted into the airways to examine the lungs and collect samples if needed.">bronchoscopy</span>.</p>
             <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
         </div></div>
+    </div>
+
+    <!-- Modal for explanations -->
+    <div id="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="modal-text"></p>
+        </div>
     </div>
 
     <script>
@@ -380,6 +451,28 @@
             answers = {};
             localStorage.removeItem('coughAnswers');
             showCurrent();
+        }
+
+        // Modal functions
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('modal-text');
+
+        document.querySelectorAll('.medical-term').forEach(term => {
+            term.addEventListener('click', () => {
+                modalText.innerText = term.dataset.explanation;
+                modal.style.display = 'block';
+            });
+        });
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
         }
 
         window.onload = showCurrent;
