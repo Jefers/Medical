@@ -3,101 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persistent Cough Diagnosis Tree</title>
+    <title>Cough Diagnosis</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        div { margin: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; display: none; }
-        button { margin: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        .diagnosis { background-color: #f8f9fa; }
-        .warning { color: red; font-weight: bold; }
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        :root {
+            /* Mid-Blue Medical Theme - Dark Mode Default */
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --tertiary-bg: #2a2a2a;
+            --primary-text: #ffffff;
+            --secondary-text: #a0a0a0;
+            --accent-color: #3b82f6;           /* Mid-blue primary */
+            --border-color: rgba(255, 255, 255, 0.1);
+
+            /* Light mode overrides */
+            --primary-bg-light: #ffffff;
+            --secondary-bg-light: #f8f9fa;
+            --tertiary-bg-light: #e9ecef;
+            --primary-text-light: #1a1a1a;
+            --secondary-text-light: #6c757d;
+            --border-color-light: rgba(0, 0, 0, 0.1);
+
+            /* Theme variations - Mid Blue */
+            --theme-1: #3b82f6;   /* Primary blue */
+            --theme-2: #2563eb;   /* Secondary blue */
+            --theme-3: #1d4ed8;   /* Darker blue */
+            --theme-4: #dbeafe;   /* Light blue */
+
+            /* Glowing border colors - Blue variants */
+            --glow-color-1: #3b82f6;
+            --glow-color-2: #2563eb;
+            --glow-color-3: #1d4ed8;
+            --glow-color-4: #60a5fa;
+
+            /* Design tokens */
+            --border-radius-card: 16px;
+            --border-radius-button: 12px;
+            --border-radius-input: 12px;
+            --transition-base: all 0.3s ease;
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-size-base: 16px;
+            --line-height-base: 1.6;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        .light-mode {
+            --primary-bg: var(--primary-bg-light);
+            --secondary-bg: var(--secondary-bg-light);
+            --tertiary-bg: var(--tertiary-bg-light);
+            --primary-text: var(--primary-text-light);
+            --secondary-text: var(--secondary-text-light);
+            --border-color: var(--border-color-light);
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            margin: 0;
+            padding: 0;
+            line-height: var(--line-height-base);
+            font-size: var(--font-size-base);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-xl);
+            font-weight: 700;
+        }
+
+        .warning {
+            color: #ef4444;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-glow-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: var(--border-radius-card);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-glow-wrapper::before,
+        .card-glow-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: conic-gradient(
+                from var(--angle),
+                var(--glow-color-1),
+                var(--glow-color-2),
+                var(--glow-color-3),
+                var(--glow-color-4),
+                var(--glow-color-1)
+            );
+            border-radius: calc(var(--border-radius-card) + 4px);
+            z-index: 0;
+            animation: rotate 6s linear infinite;
+            opacity: 0.6;
+            filter: blur(20px);
+        }
+
+        .card-glow-wrapper::after {
+            inset: -2px;
+            opacity: 0.8;
+            filter: blur(10px);
+        }
+
+        @keyframes rotate {
+            to { --angle: 360deg; }
+        }
+
+        @supports not (background: conic-gradient(from var(--angle), red, blue)) {
+            .card-glow-wrapper::before,
+            .card-glow-wrapper::after {
+                animation: rotate-fallback 6s linear infinite;
+            }
+            @keyframes rotate-fallback {
+                to { transform: rotate(360deg); }
+            }
+        }
+
+        .card-glow {
+            position: relative;
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius-card);
+            padding: var(--spacing-lg);
+            z-index: 2;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .question {
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-lg);
+            color: var(--primary-text);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border-radius: var(--border-radius-button);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-base);
+            border: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, var(--theme-1), var(--theme-2));
+            color: white;
+        }
+
+        .btn-no {
+            background: var(--tertiary-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-reset {
+            margin-top: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--theme-3), var(--theme-2));
+            color: white;
+        }
+
+        .diagnosis {
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius-card);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .diagnosis strong {
+            color: var(--accent-color);
+        }
+
+        @media (min-width: 768px) {
+            .button-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+            .btn {
+                width: auto;
+                min-width: 140px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+            }
+            .card-glow-wrapper::before,
+            .card-glow-wrapper::after {
+                animation: none !important;
+            }
+            .btn:hover {
+                transform: none !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Persistent Cough Diagnosis Tree</h1>
-    <p class="warning">This is for educational purposes only. Consult a doctor for any medical concerns.</p>
+    <div class="container">
+        <h1>Cough Diagnosis</h1>
+        <p class="warning">This is for educational purposes only. Consult a doctor for any medical concerns.</p>
 
-    <div id="q1">
-        <p>Question 1: Do you have any red-flag symptoms? (e.g., coughing up blood, unexplained weight loss, night sweats, prolonged fever)</p>
-        <button onclick="answer('q1', 'yes')">Yes</button>
-        <button onclick="answer('q1', 'no')">No</button>
-    </div>
+        <div id="q1" class="card-glow-wrapper"><div class="card-glow">
+            <p class="question">Question 1: Do you have any red-flag symptoms? (e.g., coughing up blood, unexplained weight loss, night sweats, prolonged fever)</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q1', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q1', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="redflag" class="diagnosis">
-        <p><strong>Likely serious cause:</strong> These symptoms could indicate conditions like infection, cancer, or other urgent issues. Seek immediate medical attention.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="redflag" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely serious cause:</strong> These symptoms could indicate conditions like infection, cancer, or other urgent issues. Seek immediate medical attention.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q2">
-        <p>Question 2: Are you a current smoker or have a significant history of smoking?</p>
-        <button onclick="answer('q2', 'yes')">Yes</button>
-        <button onclick="answer('q2', 'no')">No</button>
-    </div>
+        <div id="q2" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 2: Are you a current smoker or have a significant history of smoking?</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q2', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q2', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="smoking" class="diagnosis">
-        <p><strong>Likely cause:</strong> Smoking-related, such as chronic bronchitis or COPD. Quit smoking and see a doctor for evaluation (e.g., spirometry).</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="smoking" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Smoking-related, such as chronic bronchitis or COPD. Quit smoking and see a doctor for evaluation (e.g., spirometry).</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q3">
-        <p>Question 3: Are you taking ACE inhibitor medications? (e.g., lisinopril, enalapril for blood pressure)</p>
-        <button onclick="answer('q3', 'yes')">Yes</button>
-        <button onclick="answer('q3', 'no')">No</button>
-    </div>
+        <!-- Remaining questions and diagnoses follow the same pattern -->
+        <div id="q3" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 3: Are you taking ACE inhibitor medications? (e.g., lisinopril, enalapril for blood pressure)</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q3', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q3', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="ace" class="diagnosis">
-        <p><strong>Likely cause:</strong> Medication side effect. Discuss switching medications with your doctor.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="ace" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Medication side effect. Discuss switching medications with your doctor.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q4">
-        <p>Question 4: Do you have symptoms of allergies or postnasal drip? (e.g., runny nose, sneezing, frequent throat clearing)</p>
-        <button onclick="answer('q4', 'yes')">Yes</button>
-        <button onclick="answer('q4', 'no')">No</button>
-    </div>
+        <div id="q4" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 4: Do you have symptoms of allergies or postnasal drip? (e.g., runny nose, sneezing, frequent throat clearing)</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q4', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q4', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="uacs" class="diagnosis">
-        <p><strong>Likely cause:</strong> Upper airway cough syndrome (postnasal drip). Try antihistamines/decongestants and see a doctor if no improvement.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="uacs" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Upper airway cough syndrome (postnasal drip). Try antihistamines/decongestants and see a doctor if no improvement.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q5">
-        <p>Question 5: Do you experience wheezing, shortness of breath, or symptoms worsening at night/with exercise?</p>
-        <button onclick="answer('q5', 'yes')">Yes</button>
-        <button onclick="answer('q5', 'no')">No</button>
-    </div>
+        <div id="q5" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 5: Do you experience wheezing, shortness of breath, or symptoms worsening at night/with exercise?</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q5', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q5', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="asthma" class="diagnosis">
-        <p><strong>Likely cause:</strong> Asthma. See a doctor for lung function tests and possible inhalers.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="asthma" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Asthma. See a doctor for lung function tests and possible inhalers.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q6">
-        <p>Question 6: Do you have heartburn, regurgitation, or symptoms worsening when lying down?</p>
-        <button onclick="answer('q6', 'yes')">Yes</button>
-        <button onclick="answer('q6', 'no')">No</button>
-    </div>
+        <div id="q6" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 6: Do you have heartburn, regurgitation, or symptoms worsening when lying down?</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q6', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q6', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="gerd" class="diagnosis">
-        <p><strong>Likely cause:</strong> Gastroesophageal reflux disease (GERD). Try antacids or PPIs and consult a doctor.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="gerd" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Gastroesophageal reflux disease (GERD). Try antacids or PPIs and consult a doctor.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="q7">
-        <p>Question 7: Did your cough start after a recent upper respiratory infection (e.g., cold or flu)?</p>
-        <button onclick="answer('q7', 'yes')">Yes</button>
-        <button onclick="answer('q7', 'no')">No</button>
-    </div>
+        <div id="q7" class="card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p class="question">Question 7: Did your cough start after a recent upper respiratory infection (e.g., cold or flu)?</p>
+            <div class="button-group">
+                <button class="btn btn-yes" onclick="answer('q7', 'yes')">Yes</button>
+                <button class="btn btn-no" onclick="answer('q7', 'no')">No</button>
+            </div>
+        </div></div>
 
-    <div id="postviral" class="diagnosis">
-        <p><strong>Likely cause:</strong> Post-viral cough. It may resolve on its own, but see a doctor if it persists beyond 8 weeks.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
-    </div>
+        <div id="postviral" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Post-viral cough. It may resolve on its own, but see a doctor if it persists beyond 8 weeks.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
 
-    <div id="other" class="diagnosis">
-        <p><strong>Likely cause:</strong> Less common issues (e.g., infections, environmental irritants, or other lung/heart conditions). See a specialist for further tests like CT scan or bronchoscopy.</p>
-        <button onclick="resetTree()">Reset and Start Over</button>
+        <div id="other" class="diagnosis card-glow-wrapper" style="display:none;"><div class="card-glow">
+            <p><strong>Likely cause:</strong> Less common issues (e.g., infections, environmental irritants, or other lung/heart conditions). See a specialist for further tests like CT scan or bronchoscopy.</p>
+            <button class="btn btn-reset" onclick="resetTree()">Reset and Start Over</button>
+        </div></div>
     </div>
 
     <script>
@@ -105,7 +347,8 @@
         let answers = JSON.parse(localStorage.getItem('coughAnswers')) || {};
 
         function showCurrent() {
-            document.querySelectorAll('div').forEach(div => div.style.display = 'none');
+            document.querySelectorAll('.card-glow-wrapper').forEach(el => el.style.display = 'none');
+
             if (answers.q1 === 'yes') return document.getElementById('redflag').style.display = 'block';
             if (answers.q2 === 'yes') return document.getElementById('smoking').style.display = 'block';
             if (answers.q3 === 'yes') return document.getElementById('ace').style.display = 'block';
@@ -113,11 +356,18 @@
             if (answers.q5 === 'yes') return document.getElementById('asthma').style.display = 'block';
             if (answers.q6 === 'yes') return document.getElementById('gerd').style.display = 'block';
             if (answers.q7 === 'yes') return document.getElementById('postviral').style.display = 'block';
-            if (Object.keys(answers).length >= questions.length) return document.getElementById('other').style.display = 'block';
+
+            if (Object.keys(answers).length >= questions.length) {
+                document.getElementById('other').style.display = 'block';
+                return;
+            }
 
             const nextQ = questions.find(q => !answers[q]);
-            if (nextQ) document.getElementById(nextQ).style.display = 'block';
-            else document.getElementById('q1').style.display = 'block';
+            if (nextQ) {
+                document.getElementById(nextQ).style.display = 'block';
+            } else {
+                document.getElementById('q1').style.display = 'block';
+            }
         }
 
         function answer(q, ans) {
