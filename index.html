@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Cough Diagnosis Tree</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        div { margin: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; display: none; }
+        button { margin: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .diagnosis { background-color: #f8f9fa; }
+        .warning { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Persistent Cough Diagnosis Tree</h1>
+    <p class="warning">This is for educational purposes only. Consult a doctor for any medical concerns.</p>
+
+    <div id="q1">
+        <p>Question 1: Do you have any red-flag symptoms? (e.g., coughing up blood, unexplained weight loss, night sweats, prolonged fever)</p>
+        <button onclick="answer('q1', 'yes')">Yes</button>
+        <button onclick="answer('q1', 'no')">No</button>
+    </div>
+
+    <div id="redflag" class="diagnosis">
+        <p><strong>Likely serious cause:</strong> These symptoms could indicate conditions like infection, cancer, or other urgent issues. Seek immediate medical attention.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q2">
+        <p>Question 2: Are you a current smoker or have a significant history of smoking?</p>
+        <button onclick="answer('q2', 'yes')">Yes</button>
+        <button onclick="answer('q2', 'no')">No</button>
+    </div>
+
+    <div id="smoking" class="diagnosis">
+        <p><strong>Likely cause:</strong> Smoking-related, such as chronic bronchitis or COPD. Quit smoking and see a doctor for evaluation (e.g., spirometry).</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q3">
+        <p>Question 3: Are you taking ACE inhibitor medications? (e.g., lisinopril, enalapril for blood pressure)</p>
+        <button onclick="answer('q3', 'yes')">Yes</button>
+        <button onclick="answer('q3', 'no')">No</button>
+    </div>
+
+    <div id="ace" class="diagnosis">
+        <p><strong>Likely cause:</strong> Medication side effect. Discuss switching medications with your doctor.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q4">
+        <p>Question 4: Do you have symptoms of allergies or postnasal drip? (e.g., runny nose, sneezing, frequent throat clearing)</p>
+        <button onclick="answer('q4', 'yes')">Yes</button>
+        <button onclick="answer('q4', 'no')">No</button>
+    </div>
+
+    <div id="uacs" class="diagnosis">
+        <p><strong>Likely cause:</strong> Upper airway cough syndrome (postnasal drip). Try antihistamines/decongestants and see a doctor if no improvement.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q5">
+        <p>Question 5: Do you experience wheezing, shortness of breath, or symptoms worsening at night/with exercise?</p>
+        <button onclick="answer('q5', 'yes')">Yes</button>
+        <button onclick="answer('q5', 'no')">No</button>
+    </div>
+
+    <div id="asthma" class="diagnosis">
+        <p><strong>Likely cause:</strong> Asthma. See a doctor for lung function tests and possible inhalers.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q6">
+        <p>Question 6: Do you have heartburn, regurgitation, or symptoms worsening when lying down?</p>
+        <button onclick="answer('q6', 'yes')">Yes</button>
+        <button onclick="answer('q6', 'no')">No</button>
+    </div>
+
+    <div id="gerd" class="diagnosis">
+        <p><strong>Likely cause:</strong> Gastroesophageal reflux disease (GERD). Try antacids or PPIs and consult a doctor.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="q7">
+        <p>Question 7: Did your cough start after a recent upper respiratory infection (e.g., cold or flu)?</p>
+        <button onclick="answer('q7', 'yes')">Yes</button>
+        <button onclick="answer('q7', 'no')">No</button>
+    </div>
+
+    <div id="postviral" class="diagnosis">
+        <p><strong>Likely cause:</strong> Post-viral cough. It may resolve on its own, but see a doctor if it persists beyond 8 weeks.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <div id="other" class="diagnosis">
+        <p><strong>Likely cause:</strong> Less common issues (e.g., infections, environmental irritants, or other lung/heart conditions). See a specialist for further tests like CT scan or bronchoscopy.</p>
+        <button onclick="resetTree()">Reset and Start Over</button>
+    </div>
+
+    <script>
+        const questions = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
+        let answers = JSON.parse(localStorage.getItem('coughAnswers')) || {};
+
+        function showCurrent() {
+            document.querySelectorAll('div').forEach(div => div.style.display = 'none');
+            if (answers.q1 === 'yes') return document.getElementById('redflag').style.display = 'block';
+            if (answers.q2 === 'yes') return document.getElementById('smoking').style.display = 'block';
+            if (answers.q3 === 'yes') return document.getElementById('ace').style.display = 'block';
+            if (answers.q4 === 'yes') return document.getElementById('uacs').style.display = 'block';
+            if (answers.q5 === 'yes') return document.getElementById('asthma').style.display = 'block';
+            if (answers.q6 === 'yes') return document.getElementById('gerd').style.display = 'block';
+            if (answers.q7 === 'yes') return document.getElementById('postviral').style.display = 'block';
+            if (Object.keys(answers).length >= questions.length) return document.getElementById('other').style.display = 'block';
+
+            const nextQ = questions.find(q => !answers[q]);
+            if (nextQ) document.getElementById(nextQ).style.display = 'block';
+            else document.getElementById('q1').style.display = 'block';
+        }
+
+        function answer(q, ans) {
+            answers[q] = ans;
+            localStorage.setItem('coughAnswers', JSON.stringify(answers));
+            showCurrent();
+        }
+
+        function resetTree() {
+            answers = {};
+            localStorage.removeItem('coughAnswers');
+            showCurrent();
+        }
+
+        window.onload = showCurrent;
+    </script>
+</body>
+</html>
